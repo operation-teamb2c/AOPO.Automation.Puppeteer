@@ -1,0 +1,23 @@
+{
+  "name": "aopo-automation-puppeteer",
+  "version": "1.0.0",
+  "description": "AOPO Automation using Puppeteer",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "puppeteer",
+    "automation",
+    "aopo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "puppeteer": "^21.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

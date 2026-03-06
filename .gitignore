@@ -1,0 +1,10 @@
+# Ignore the .env file
+.env
+.env_dev
+.env_prod
+.env_stg
+
+node_modules/
+HELPER_STRUCTURE_REVIEW.md
+testingSave.js
+report.json
