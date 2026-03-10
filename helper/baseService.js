@@ -1,4 +1,20 @@
 import { utcToJakartaISO } from "./date/formatDate.js";
+import * as fs from 'fs';
+
+function getImageMimeType(filePath) {
+    const extension = filePath.split('.').pop().toLowerCase();
+    switch (extension) {
+        case 'png':
+            return 'image/png';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'gif':
+            return 'image/gif';
+        default:
+            return 'image/png';
+    }
+}
 
 export const runStep = async (stepResult, step, name, fn, ...argsAndOptions) => {
     let options = {};
@@ -107,8 +123,7 @@ export const summarizeResult = (stepResult, step) => {
             // scenario_id: r.scenarioId,
             name: stepName,
             order: stepOrder + 1,
-            status: r.status,
-            // status: mapStatusCode(r.status),
+            status: mapStatusCode(r.status),
             log_message: r.message,
             start_time: r.start_time,
             end_time: r.end_time,
@@ -208,4 +223,45 @@ export async function waitTextExists(page, selector, text, timeout = 5000) {
     } catch {
         return false;
     }
+}
+
+export const mapStatusCode = (statusCode) => {
+    if (statusCode === 200) return 'Passed';
+    if (statusCode === 204) return 'Skipped';
+    if (statusCode === 206) return 'Warning';
+    return 'Failed';
+};
+
+export const convertToBase64 = async (filePath) => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, (error, image) => {
+            if (error) {
+                reject(error);
+            } else {
+                const base64 = image.toString('base64');
+                const mimeType = getImageMimeType(filePath);
+                resolve(`data:${mimeType};base64,${base64}`);
+            }
+        });
+    });
+}
+
+export function coverDate(formattedDate) {
+    const options = {
+        year: 'numeric',
+        month: 'numeric',
+        day: '2-digit',
+        timeZone: "Asia/Jakarta"
+    };
+
+    const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    const [day, month, year] = formattedDate.split('/');
+    const monthNameInIndonesian = monthNames[parseInt(month, 10) - 1]; // Get the month name
+    const customFormattedDate = `${day} ${monthNameInIndonesian} ${year}`;
+
+    return customFormattedDate
 }

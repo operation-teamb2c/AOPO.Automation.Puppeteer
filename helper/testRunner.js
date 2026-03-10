@@ -38,10 +38,10 @@ export async function runTestCase(data) {
             Object.assign(result, summaryResult);
         }
 
-        // result = flattenObjectKeys(result, ['summary']);
+        result = flattenObjectKeys(result, ['summary']);
         result.end = new Date();
         result.timeExecution = await durationCalculation(result.end, result.start);
-        // result.dbScenario = buildReportScenario(result, data, userAgent, isMobile);
+        result.dbScenario = buildReportScenario(result, data, userAgent, isMobile);
 
     } catch (error) {
         console.error(`Error in runTestCase ${data.testCase}:`, error);
@@ -98,6 +98,89 @@ export async function runTestCase(data) {
     } finally {
         if (browser) await browser.close();
     }
-
+    
+    console.log('result >>', result);
+    
     return result;
+}
+
+
+export function buildReportScenario(result, data, userAgent = '', isMobile = false) {
+    const steps = result?.summary?.dbStep || result?.dbStep || [];
+    
+    const totalPassed = steps.filter(s => s.status === 'Passed').length;
+    const totalFailed = steps.filter(s => s.status === 'Failed').length;
+    const totalWarning = steps.filter(s => s.status === 'Warning').length;
+    const totalSkipped = steps.filter(s => s.status === 'Skipped').length;
+
+    const expectedFailSteps = data.expectedFailAt
+        ? (Array.isArray(data.expectedFailAt) ? data.expectedFailAt : [data.expectedFailAt])
+        : [];
+
+    let totalFailedExpected = 0;
+    let totalFailedUnexpected = 0;
+
+    steps.forEach(step => {
+        if (step.status === 'Failed') {
+            const isExpectedFail = expectedFailSteps.some(pattern =>
+                step.name.includes(pattern)
+            );
+
+            if (data.type === 'Negative' && isExpectedFail) {
+                totalFailedExpected++;
+            } else {
+                totalFailedUnexpected++;
+            }
+        }
+    });
+
+    let overallStatus = 'Passed';
+    if (data.type === 'Negative' && data.expectedFailAt) {
+        overallStatus = (totalFailedExpected > 0 && totalFailedUnexpected === 0)
+            ? 'Passed'
+            : 'Failed';
+    } else {
+        overallStatus = totalFailed > 0 ? 'Failed' : 'Passed';
+    }
+
+    let resultCategory = '';
+    if (overallStatus === 'Passed') {
+        resultCategory = (data.type === 'Negative' && data.expectedFailAt)
+            ? 'passed_negative_expected'
+            : 'passed';
+    } else {
+        resultCategory = 'failed';
+    }
+
+    return {
+        userAgent,
+        isMobile,
+        code: data.testCase,
+        scenario: data.scenario,
+        type: data.type,
+        status: overallStatus,
+        resultCategory: resultCategory,
+        total_step: steps.length,
+        total_passed: totalPassed,
+        total_failed: totalFailed,
+        total_failed_expected: totalFailedExpected,
+        total_failed_unexpected: totalFailedUnexpected,
+        total_warning: totalWarning,
+        total_skipped: totalSkipped,
+        start_time: utcToJakartaISO(result.start),
+        end_time: utcToJakartaISO(result.end),
+        created_by: process.env.CREATED_BY || 'automation_system',
+        duration_ms: result.end - result.start,
+        test_steps: steps
+    };
+}
+
+function flattenObjectKeys(obj, keys) {
+    keys.forEach(key => {
+        if (obj[key] && typeof obj[key] === 'object') {
+            Object.assign(obj, obj[key]);
+            delete obj[key];
+        }
+    });
+    return obj;
 }

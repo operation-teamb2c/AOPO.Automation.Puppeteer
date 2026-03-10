@@ -11,6 +11,8 @@ export const loginProcess = async (page, data, browser, step = [], stepResult = 
     if (accessLoginPage.status !== 200) return stop();
 
     const loginResult = await runStep(stepResult, step, 'Login', login, page, data, { __options: true, scenarioId });
+    if (testCase.includes('LOG')) return summarizeResult(stepResult, step);
+    
     
     return {
         userID: loginResult?.userID || '',
