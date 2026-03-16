@@ -216,6 +216,7 @@ export const chooseCharger = async (page, data) => {
                     return img && img.complete && img.naturalWidth > 0;
                 });
 
+                await page.waitForTimeout(1000)
                 await page.click('.swal2-confirm');
 
                 return {
@@ -318,6 +319,7 @@ export const submitDataCharging = async (page, data) => {
                     message: 'Successfully submit voucher code'
                 };
             } else {
+                await page.waitForTimeout(1000);
                 await scrollToBottom(page);
 
                 await page.click('#lainyaButton');
@@ -330,11 +332,13 @@ export const submitDataCharging = async (page, data) => {
                 console.log('isInputKWh >>', isInputKWh);
 
                 if (!isInputKWh) throw new Error('Login element with id #bLogin not found');
-
+                await scrollToBottom(page);
                 await page.type('#input_lainya', data.inputKWh.toString(), { delay: 1 });
 
-
+                await scrollToBottom(page);
+                await page.waitForTimeout(1000);
                 await page.click('#lanjutP');
+
                 const isPaymentConfirmationPage = await waitTextExists(
                     page,
                     'h3',
