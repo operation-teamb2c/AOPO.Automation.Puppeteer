@@ -1,4 +1,5 @@
 import { utcToJakartaISO } from "./date/formatDate.js";
+import { TIMEOUT_CONFIG } from "./config.js";
 import * as fs from 'fs';
 
 function getImageMimeType(filePath) {
@@ -168,6 +169,16 @@ export const execute = async (page, actionName, fn) => {
     }
 };
 
+export const takeScreenshot = async (page, scenario, name) => {
+    const options = {
+        fullPage: false,
+        omitBackground: true
+    };
+    const base64Image = await page.screenshot({ ...options, encoding: 'base64' });
+
+    return `data:image/png;base64,${base64Image}`;
+}
+
 export const responseUrl = async (page, xhr, payloadKey = null, payloadValue = null) => {
     const checkUrl = page.waitForResponse(async (r) => {
         if (r.request().method() === "OPTIONS") return false;
@@ -195,7 +206,7 @@ export const responseUrl = async (page, xhr, payloadKey = null, payloadValue = n
     return res.json();
 };
 
-export const validateVisibleSelectors = async (page, selectors, timeout = 5000) => {
+export const validateVisibleSelectors = async (page, selectors, timeout = TIMEOUT_CONFIG.SELECTOR) => {
     try {
         for (const selector of selectors) {
             await page.waitForSelector(selector, { visible: true, timeout });
@@ -206,7 +217,7 @@ export const validateVisibleSelectors = async (page, selectors, timeout = 5000) 
     }
 };
 
-export async function waitTextExists(page, selector, text, timeout = 5000) {
+export async function waitTextExists(page, selector, text, timeout = TIMEOUT_CONFIG.SELECTOR) {
     try {
         await page.waitForFunction(
             ({ selector, text }) => {

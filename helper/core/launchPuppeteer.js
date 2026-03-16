@@ -1,9 +1,10 @@
 import puppeteer from 'puppeteer';
+import { TIMEOUT_CONFIG } from '../config.js';
 
 export async function launchPuppeteerStep(data) {
     const { isMobileWeb = false, keyword, loginType } = data;
-    const option = false;
-    // const option = 'new';
+    // const option = false;
+    const option = 'new';
     const headlessOption = (keyword === 'Gunakan lokasi saya saat ini' || loginType === 'socialGoogle')
         ? false
         : option;
@@ -34,9 +35,13 @@ export async function launchPuppeteerStep(data) {
         });
 
         page = await browser.newPage();
+        await page.setViewport({
+            width: 1920,
+            height: 1000
+        });
     }
 
-    page.setDefaultTimeout(60000);
+    page.setDefaultTimeout(TIMEOUT_CONFIG.PAGE_DEFAULT);
 
     return {
         browser,

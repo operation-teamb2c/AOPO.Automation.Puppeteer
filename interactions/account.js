@@ -1,4 +1,5 @@
 import { execute, responseUrl, runStep } from "../helper/baseService.js";
+import { TIMEOUT_CONFIG } from "../helper/config.js";
 
 export const login = async (page, data, browser) => {
     return execute(page, 'login', async (img) => {
@@ -9,7 +10,7 @@ export const login = async (page, data, browser) => {
         await runStep(childResult, child, 'Input Username', async () => {
             await page.waitForSelector('#email_phone', {
                 visible: true,
-                timeout: 5000,
+                timeout: TIMEOUT_CONFIG.SELECTOR,
             });
             await page.type('#email_phone', username);
             return {
@@ -27,7 +28,7 @@ export const login = async (page, data, browser) => {
         }, { __options: true, child: true });
 
         const result = await runStep(childResult, child, 'Submit Data Login', async () => {
-            const loginButton = await page.waitForSelector('#bLogin', { visible: true, timeout: 7500 });
+            const loginButton = await page.waitForSelector('#bLogin', { visible: true, timeout: TIMEOUT_CONFIG.LOGIN });
             const [res] = await Promise.all([
                 responseUrl(page, '/auth-login'),
                 loginButton.click()
@@ -38,8 +39,8 @@ export const login = async (page, data, browser) => {
             return res;
         }, { __options: true, child: true });
 
-        await page.waitForTimeout(500);
-        const OKButton = await page.waitForXPath('//button[normalize-space()="OK"]', { visible: true, timeout: 5000 }).catch(() => null);
+        await page.waitForTimeout(TIMEOUT_CONFIG.DELAY_MEDIUM);
+        const OKButton = await page.waitForXPath('//button[normalize-space()="OK"]', { visible: true, timeout: TIMEOUT_CONFIG.SELECTOR }).catch(() => null);
         if (OKButton) {
             await OKButton.click();
         }

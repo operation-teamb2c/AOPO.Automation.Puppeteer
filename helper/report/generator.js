@@ -1,10 +1,13 @@
 import { endOfHTML, endOfSummary, htmlHeader } from "../../templates/html.js";
 import { dateDifference, utcToJakartaISO } from "../date/formatDate.js";
 import { constructDetail, constructSummary } from "./builder.js";
+import { TIMEOUT_CONFIG } from "../config.js";
 import puppeteer from 'puppeteer';
 import * as path from 'path';
 import * as fs from 'fs';
 import { convertToBase64 } from "../baseService.js";
+import dotenv from 'dotenv';
+dotenv.config({ quiet: true });
 
 const base64Image = await convertToBase64('./assets/images/AstraOtopower.png');
 
@@ -52,7 +55,7 @@ export function calculateOverallSummary(testResults) {
 const contentHeader = `
     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 9px; width: 100%;padding: 0 15px; ">
         <span>
-            <i>This is a generated PDF for Automation Test Result B2C AstraOtoshop (https://astraotoshop.com)</i>
+            <i>This is a generated PDF for Automation Test Astra Otopower (${process.env.BASE_URL || 'Evecharging'})</i>
         </span>
         <img src="${base64Image}" style="height: 25px; width: auto; margin-left: auto;" />
     </div>
@@ -264,10 +267,10 @@ export const generatePdf = async (content, scenario, paymentMethod, pointAmount,
     });
 
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(TIMEOUT_CONFIG.DELAY_LONG);
 
     await fs.promises.writeFile(folder + '/' + scenario + '.html', content);
-    await page.waitForTimeout(150)
+    await page.waitForTimeout(TIMEOUT_CONFIG.DELAY_SHORT)
 
     await page.pdf({
         path: pdfFilePath,

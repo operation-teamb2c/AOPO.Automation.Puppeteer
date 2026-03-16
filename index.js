@@ -1,9 +1,10 @@
-import dotenv from 'dotenv';
+
 import puppeteer from 'puppeteer';
 import { parseCommandLineArgs, validateAndLoadTestFile } from './helper/cliHandler.js';
 import { runTestCase } from './helper/testRunner.js';
 import { generateAndSendReport } from './helper/report/generator.js';
-dotenv.config();
+import dotenv from 'dotenv';
+dotenv.config({ quiet: true });
 
 (async () => {
     const startDate = new Date();
@@ -19,8 +20,6 @@ dotenv.config();
 
         console.log(`${data.testCase} done. . .`);
     }
-
-    console.log('testResults >>', testResults);
     
     await generateAndSendReport(testResults, {
         inputData,
@@ -29,7 +28,4 @@ dotenv.config();
         command,
         runDescription
     });
-
-    // screenshot
-    //   await page.screenshot({ path: 'example.png' });
 })();

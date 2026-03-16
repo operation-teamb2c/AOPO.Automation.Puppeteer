@@ -99,8 +99,6 @@ export async function runTestCase(data) {
         if (browser) await browser.close();
     }
     
-    console.log('result >>', result);
-    
     return result;
 }
 

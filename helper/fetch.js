@@ -8,6 +8,7 @@ export async function fetchUserLocation(page, isOffline = false) {
             });
             return await res.text();
         }
+        
 
         async function findLocation(isOffline) {
             let currentPage = 1;

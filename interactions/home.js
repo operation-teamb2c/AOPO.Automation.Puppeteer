@@ -1,15 +1,18 @@
+import { TIMEOUT_CONFIG } from "../helper/config.js";
+
 export const accessScanCharging = async (page, data) => {
     try {
 
         const scanIcon = await page.waitForSelector(
             'a[href*="scan-charging"]',
-            { visible: true, timeout: 5000 }
+            { visible: true, timeout: TIMEOUT_CONFIG.SELECTOR }
         );
 
         await scanIcon.click();
-
-        await page.waitForSelector('#pills-scan-qr-tab', { visible: true, timeout: 5000 });
-        await page.waitForSelector('#pills-pilih-charger-tab', { visible: true, timeout: 5000 });
+        await page.waitForFunction(() =>
+            window.location.pathname === '/user/scan-charging'
+        );
+        await page.waitForSelector('#qr-video', { visible: true});
 
         return {
             status: 200,

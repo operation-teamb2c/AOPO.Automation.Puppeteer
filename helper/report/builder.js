@@ -37,8 +37,6 @@ export function countStatus(statusObject = {}) {
 }
 
 export const constructSummary = async (data) => {
-   // console.log('data >>', data);
-
    let scenarioStatus = data.dbScenario.status || 'N/A';
    scenarioStatus = scenarioStatus === 'Passed'
       ? '✅ Passed'
@@ -77,8 +75,6 @@ export const constructDetail = async (data) => {
       Object.entries(screeningData).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
    );
       
-   console.log('data >>', data);
-   
    let section1 = await constructFirstSection(data, newData);
    let section2 = '';
 
@@ -92,8 +88,6 @@ export const constructDetail = async (data) => {
 const constructFirstSection = async (data) => {
 
    let { pass, fail, skip, warning } = countStatus(data.status);
-   console.log('data.status >>', data.status);
-   
    let totalCount = Object.keys(data.status).length;
 
    const summaryItems = [
