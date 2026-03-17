@@ -44,7 +44,7 @@ export async function runTestCase(data) {
         result.dbScenario = buildReportScenario(result, data, userAgent, isMobile);
 
     } catch (error) {
-        console.error(`Error in runTestCase ${data.testCase}:`, error);
+        console.error(`Error in runTestCase ${data.testCase}:`, error.message);
         const errorEndTime = new Date();
         const failDuration = durationCalculation(errorEndTime, result.start);
 

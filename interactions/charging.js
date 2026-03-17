@@ -6,13 +6,13 @@ import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
 export const chooseCharger = async (page, data) => {
-    const isOffline = data?.scenario?.toLowerCase().includes('offline')
-        && data?.type?.toLowerCase() === 'negative'
-        && data?.expectedFailAt?.toLowerCase() === 'select charger & connector';
-
     return execute(page, 'pilih charger', async (img) => {
         let child = [];
         let childResult = {};
+
+        const isOffline = data?.scenario?.toLowerCase().includes('offline')
+            && data?.type?.toLowerCase() === 'negative'
+            && data?.expectedFailAt?.toLowerCase() === 'select charger & connector';
 
         const switchTab = await runStep(childResult, child, 'Access Pilih Charger Tab', async () => {
             try {
@@ -74,6 +74,7 @@ export const chooseCharger = async (page, data) => {
         const locationName = checkLocations.data.location;
         const dataConnector = checkLocations.data.connectors[0] || [];
         const { charger, type: connectorType } = dataConnector;
+
         const chargerStation = `${locationName} - ${charger.split(' - ')[0]}`;
 
         const chooseChargerStation = await runStep(childResult, child, 'Choose Charger Station', async () => {
@@ -165,8 +166,6 @@ export const chooseCharger = async (page, data) => {
                 await scrollIntoView(page, submitDataCharger);
 
                 await submitDataCharger.click();
-                // await page.waitForTimeout(1000);
-
                 const alertResult = await Promise.race([
                     waitTextExists(
                         page,
@@ -184,8 +183,6 @@ export const chooseCharger = async (page, data) => {
                         'Scan QR Berhasil',
                         TIMEOUT_CONFIG.SELECTOR).then(() => 'success')
                 ]).catch(() => 'timeout');
-
-                console.log('alert result >>', alertResult);
 
                 if (alertResult === 'charger_unavailable') {
                     throw new Error('Pengisi daya tidak tersedia');
@@ -225,10 +222,12 @@ export const chooseCharger = async (page, data) => {
                 };
             } catch (error) {
                 const errorMessage = error.message;
+                img['Error submit charger location'] = await takeScreenshot(page);
 
                 return {
                     status: 500,
-                    message: errorMessage
+                    message: errorMessage,
+                    img
                 };
             }
         }, { __options: true, child: true });
@@ -290,14 +289,10 @@ export const submitDataCharging = async (page, data) => {
                 const isError = await page.waitForSelector('.swal2-x-mark', {
                     timeout: TIMEOUT_CONFIG.SELECTOR
                 }).then(() => true).catch(() => false);
-                console.log(isError);
 
                 if (isError) {
                     const errorMessage = await page.$eval('#swal2-html-container', el => el.textContent.trim());
-                    return {
-                        status: 500,
-                        message: errorMessage
-                    };
+                    throw new Error(errorMessage || 'Failed to redeem voucher code');
                 }
 
                 const successSubmit = await waitTextExists(
@@ -307,12 +302,12 @@ export const submitDataCharging = async (page, data) => {
                     TIMEOUT_CONFIG.SELECTOR
                 );
 
-                console.log('successSubmit >>', successSubmit);
-
                 if (successSubmit) {
                     await page.keyboard.press('Enter');
                     await page.waitForTimeout(TIMEOUT_CONFIG.DELAY_MEDIUM);
                 }
+                img['Success order'] = await takeScreenshot(page);
+
 
                 return {
                     status: 200,
@@ -329,7 +324,6 @@ export const submitDataCharging = async (page, data) => {
                     'Masukan kWh yang anda inginkan',
                     TIMEOUT_CONFIG.SELECTOR
                 );
-                console.log('isInputKWh >>', isInputKWh);
 
                 if (!isInputKWh) throw new Error('Login element with id #bLogin not found');
                 await scrollToBottom(page);
@@ -345,16 +339,12 @@ export const submitDataCharging = async (page, data) => {
                     'Konfirmasi Pembayaran',
                     TIMEOUT_CONFIG.SELECTOR
                 );
-
-                console.log('isPaymentConfirmationPage >>', isPaymentConfirmationPage);
                 if (!isPaymentConfirmationPage) throw new Error('Failed to proceed to payment confirmation page after entering kWh');
 
                 await scrollToBottom(page);
                 await page.waitForTimeout(TIMEOUT_CONFIG.DELAY_MEDIUM);
 
                 const choosePaymentMethod = await page.waitForSelector('.btn.btn-success.mb-5', { visible: true, timeout: TIMEOUT_CONFIG.SELECTOR });
-                console.log('choosePaymentMethod >>', choosePaymentMethod);
-
                 await choosePaymentMethod.click();
 
                 return {
@@ -380,10 +370,10 @@ export const submitDataCharging = async (page, data) => {
                     });
                 });
 
-                if (paymentMethods.length === 0) throw new Error('No linked payment methods found on the page');
+                if (paymentMethods.length === 0) throw new Error('Tidak ada metode pembayaran yang sudah terhubung');
 
                 const selectedPayment = paymentMethods.find(payment => payment.hasPrice);
-                if (!selectedPayment) throw new Error('No payment method with price found - cannot proceed with payment');
+                if (!selectedPayment) throw new Error('Tidak ada metode pembayaran yang sudah terhubung');
 
                 const paymentButtonSelector = `#${selectedPayment.id}`;
                 const paymentButton = await page.waitForSelector(paymentButtonSelector, { visible: true, timeout: TIMEOUT_CONFIG.SELECTOR });

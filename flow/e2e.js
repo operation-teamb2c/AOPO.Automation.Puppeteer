@@ -1,6 +1,5 @@
 import { runStep, summarizeResult } from "../helper/baseService.js";
 import { accessEVChargingStep } from "../helper/core/accessWeb.js";
-import { fetchUserLocation } from "../helper/fetch.js";
 import { login } from "../interactions/account.js";
 import { chooseCharger, submitDataCharging } from "../interactions/charging.js";
 import { accessScanCharging } from "../interactions/home.js";
@@ -28,8 +27,6 @@ export const orderProcess = async (page, data, browser, step = [], stepResult = 
 
     const chooseChargerResult = await runStep(stepResult, step, 'Select Charger & Connector', chooseCharger, page, data, { __options: true, scenarioId });
     if (chooseChargerResult.status !== 200) return stop();
-
-    console.log('chooseChargerResult >>', chooseChargerResult);
     
     const orderCharging = await runStep(stepResult, step, 'Confirm Payment & Submit Order', submitDataCharging, page, data, { __options: true, scenarioId });
     if (orderCharging.status !== 200) return stop();

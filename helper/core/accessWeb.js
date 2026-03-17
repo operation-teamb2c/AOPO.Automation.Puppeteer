@@ -1,8 +1,6 @@
 import puppeteer from 'puppeteer';
 
-export async function accessEVChargingStep(page, data) {
-    const { widget = null, testCase } = data;
-
+export async function accessEVChargingStep(page) {
     await page.goto(process.env.BASE_URL, { waitUntil: 'networkidle2' });
     
     await page.waitForSelector('#bLogin', { visible: true });

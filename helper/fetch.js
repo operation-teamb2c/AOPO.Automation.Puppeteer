@@ -28,8 +28,6 @@ export async function fetchUserLocation(page, isOffline = false) {
                     if (!nameEl || !statusEl || !detailLink) continue;
 
                     const status = statusEl.textContent.trim().toLowerCase();
-
-                    // logic based on isOffline
                     if (isOffline) {
                         if (status === 'offline') {
                             return {
@@ -64,7 +62,6 @@ export async function fetchUserLocation(page, isOffline = false) {
             return { found: false };
         }
 
-        // 🔥 Fetch Detail Page
         const detailHTML = await getHTML(location.detailUrl);
         const parser = new DOMParser();
         const detailDoc = parser.parseFromString(detailHTML, 'text/html');
@@ -77,20 +74,14 @@ export async function fetchUserLocation(page, isOffline = false) {
         if (overviewTitle) {
 
             const overviewSection = overviewTitle.closest('.row').nextElementSibling;
-
             let currentCharger = null;
-
             const rows = overviewSection.parentElement.querySelectorAll('.row');
 
             rows.forEach(row => {
-
                 const chargerEl = row.querySelector('.col-12');
-
                 if (chargerEl && !row.querySelector('.col-7')) {
-
                     const text = chargerEl.textContent.trim();
 
-                    // hanya set charger jika formatnya charger
                     if (text.includes(' - ')) {
                         currentCharger = text;
                     }

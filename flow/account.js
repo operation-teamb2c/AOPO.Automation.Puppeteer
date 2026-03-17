@@ -7,7 +7,7 @@ export const loginProcess = async (page, data, browser, step = [], stepResult = 
     const stop = () => summarizeResult(stepResult, step);
 
 
-    const accessLoginPage = await runStep(stepResult, step, 'Access Astra Otopower', accessEVChargingStep, page, data, { __options: true, scenarioId: data.id });
+    const accessLoginPage = await runStep(stepResult, step, 'Navigate to Charging Portal', accessEVChargingStep, page, data, { __options: true, scenarioId: data.id });
     if (accessLoginPage.status !== 200) return stop();
 
     const loginResult = await runStep(stepResult, step, 'Login', login, page, data, { __options: true, scenarioId });

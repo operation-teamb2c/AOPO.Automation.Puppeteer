@@ -1,10 +1,11 @@
 import puppeteer from 'puppeteer';
 import { TIMEOUT_CONFIG } from '../config.js';
+import dotenv from 'dotenv';
+dotenv.config({ quiet: true });
 
 export async function launchPuppeteerStep(data) {
     const { isMobileWeb = false, keyword, loginType } = data;
-    const option = false;
-    // const option = 'new';
+    const option = process.env.PUPPETEER_OPTION || 'new';
     const headlessOption = (keyword === 'Gunakan lokasi saya saat ini' || loginType === 'socialGoogle')
         ? false
         : option;

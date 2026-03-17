@@ -212,7 +212,7 @@ export async function generateAndSendReport(testResults, params) {
         result?.dbScenario?.resultCategory === 'failed'
     );
 
-    console.log('sending email ...');
+    // console.log('sending email ...');
     // await sendMail(attachments, runtime, failedScenarios, overallSummary);
 
     return {
